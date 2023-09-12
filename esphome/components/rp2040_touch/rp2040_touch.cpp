@@ -14,9 +14,8 @@ namespace esphome {
 namespace rp2040_touch {
 
 static const char *const TAG = "rp2040_touch";
-    
-#define N_SAMPLES 10
-#define TIMEOUT_TICKS 10000
+
+static const uint32_t timeout_ticks = 10000;
 
 void RP2040TouchComponent::setup() {
   ESP_LOGCONFIG(TAG, "Setting up RP2040 Touch Hub...");
@@ -24,7 +23,7 @@ void RP2040TouchComponent::setup() {
     gpio_disable_pulls(child->get_touch_pad());
     if (child->threshold_ > 0) continue; // Threshold defined by user
     uint32_t init_value = this->component_touch_pad_read(child->get_touch_pad());
-    if(init_value >= TIMEOUT_TICKS) {
+    if(init_value >= timeout_ticks) {
         ESP_LOGCONFIG(TAG, "Touch Pad '%s' (T%" PRIu32 ") needs 1M pulldown." PRIu32, child->get_name().c_str(),
                (uint32_t) child->get_touch_pad());
     }
@@ -50,9 +49,9 @@ void RP2040TouchComponent::dump_config() {
 }
 
 uint32_t RP2040TouchComponent::component_touch_pad_read(uint8_t tp) {
-
+    const uint32_t n_samples = 100;
     uint16_t ticks = 0;
-    for (uint16_t i = 0; i < N_SAMPLES; i++) {
+    for (uint16_t i = 0; i < n_samples; i++) {
         // set pad to digital output high for 10us to charge it
 
         gpio_set_dir(tp, GPIO_OUT);
@@ -65,8 +64,8 @@ uint32_t RP2040TouchComponent::component_touch_pad_read(uint8_t tp) {
         gpio_set_dir(tp, GPIO_IN);
 
         while (gpio_get(tp)) {
-            if (ticks >= TIMEOUT_TICKS) {
-                return TIMEOUT_TICKS;
+            if (ticks >= timeout_ticks) {
+                return timeout_ticks;
             }
             ticks++;
         }
