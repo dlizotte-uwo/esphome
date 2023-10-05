@@ -55,7 +55,7 @@ static inline void rp2040_pio_touch_init(PIO pio, uint sm, uint offset, uint pin
     in NULL, 20
     mov y, isr
     
-    ; clear the counter
+    ; clear the counter (set to max uint32)
     mov x, !NULL
     
 resample:
